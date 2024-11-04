@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Audio Upload</title>
+</head>
+<body>
+    <input type="file" id="audioInput" accept="audio/*">
+    <button onclick="sendAudio()">Send Audio</button>
+
+    <script>
+        // 建立 WebSocket 連接
+        const socket = new WebSocket('ws://localhost:8000');
+
+        // 當 WebSocket 連接成功時
+        socket.onopen = () => {
+            console.log('Connected to WebSocket server');
+        };
+
+        // 處理來自服務器的消息
+        socket.onmessage = (event) => {
+            console.log('Message from server:', event.data);
+        };
+
+        // 發送音訊文件
+        async function sendAudio() {
+            const fileInput = document.getElementById('audioInput');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // 將音訊文件轉換為 Base64 格式
+                    const base64Audio = reader.result.split(',')[1];
+                    // 發送 Base64 編碼的音訊數據到 WebSocket 服務器
+                    socket.send(base64Audio);
+                    console.log("Audio file sent to server.");
+                };
+                reader.readAsDataURL(file); // 讀取並轉換為 Base64 格式
+            } else {
+                alert("Please select an audio file first");
+            }
+        }
+
+        // 當 WebSocket 連接關閉時
+        socket.onclose = () => {
+            console.log("WebSocket connection closed");
+        };
+
+        // 當 WebSocket 出現錯誤時
+        socket.onerror = (error) => {
+            console.log("WebSock1et dserror:", error);
+        };
+    </script>
+</body>
+</html>
